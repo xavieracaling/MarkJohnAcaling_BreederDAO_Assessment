@@ -884,8 +884,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.50674593, y: 0.5}
-  m_AnchoredPosition: {x: -26.032269, y: -129.08998}
-  m_SizeDelta: {x: 351.66147, y: 82.3}
+  m_AnchoredPosition: {x: -21, y: -53}
+  m_SizeDelta: {x: 293.6, y: 68.9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &826128228
 MonoBehaviour:
@@ -930,7 +930,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 826128229}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1935221308}
+        m_TargetAssemblyTypeName: MenuGameManager, Assembly-CSharp
+        m_MethodName: PlayGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &826128229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -978,13 +990,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 952489295}
+  - component: {fileID: 952489296}
   m_Layer: 5
   m_Name: Play Container
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &952489295
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1006,6 +1019,18 @@ RectTransform:
   m_AnchoredPosition: {x: 38.093, y: 201.09}
   m_SizeDelta: {x: 723.19, y: 502.18}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &952489296
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952489294}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1009749993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1015,13 +1040,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1009749994}
+  - component: {fileID: 1009749995}
   m_Layer: 5
   m_Name: Input Container
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1009749994
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1045,6 +1071,18 @@ RectTransform:
   m_AnchoredPosition: {x: 38.094, y: -48.86}
   m_SizeDelta: {x: 723.19, y: 511.36}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &1009749995
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1009749993}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1019731298
 GameObject:
   m_ObjectHideFlags: 0
@@ -1235,7 +1273,7 @@ GameObject:
   - component: {fileID: 1025658704}
   - component: {fileID: 1025658703}
   m_Layer: 5
-  m_Name: Placeholder (1)
+  m_Name: title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1301,7 +1339,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: INPUT Y FOR COLUMN
+  m_text: INPUT Y BETWEEN <B>"3-5"</B> FOR COLUMN
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
@@ -1457,7 +1495,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1174410489}
   m_OnClick:
     m_PersistentCalls:
@@ -2766,6 +2804,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   InputX: {fileID: 1019731300}
   InputY: {fileID: 1629907775}
+  PlayContainer_CG: {fileID: 952489296}
+  InputContainerGO: {fileID: 1009749993}
+  StartGameBTN: {fileID: 1174410488}
+  InputX_OriginalPos: {x: 0, y: 0}
+  InputY_OriginalPos: {x: 0, y: 0}
+  StartGameBTN_OriginalPos: {x: 0, y: 0}
 --- !u!1 &2036134516
 GameObject:
   m_ObjectHideFlags: 0
@@ -2779,7 +2823,7 @@ GameObject:
   - component: {fileID: 2036134519}
   - component: {fileID: 2036134518}
   m_Layer: 5
-  m_Name: Placeholder (1)
+  m_Name: title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2845,7 +2889,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: INPUT X FOR ROW
+  m_text: INPUT X <B> "AS EVEN NUMBER" </B>BETWEEN <B>"4-8"</B> FOR ROW
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 2147374, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
