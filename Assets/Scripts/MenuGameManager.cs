@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using DG.Tweening;
 using UnityEngine.UI;
+using System;
 public class MenuGameManager : MonoBehaviour
 {
     [Header("Fields")]
@@ -41,5 +42,30 @@ public class MenuGameManager : MonoBehaviour
         InputX.transform.DOLocalMoveY(InputX_OriginalPos.y, 0.5f).SetEase(Ease.InOutSine).SetDelay(0.4f);
         InputY.transform.DOLocalMoveY(InputY_OriginalPos.y, 0.65f).SetEase(Ease.InOutSine).SetDelay(0.55f);
         StartGameBTN.transform.DOLocalMoveY(StartGameBTN_OriginalPos.y, 0.75f).SetEase(Ease.InOutSine).SetDelay(0.66f);
+    }
+    public void CheckStartGameValidity()
+    {
+        if(StartGameBTN.interactable )
+            StartGameBTN.interactable = false;
+
+        int xValue = -1;
+        int yValue = -1;
+        if(!string.IsNullOrEmpty(InputX.text) )
+        {
+            xValue = Int32.Parse(InputX.text);
+            xValue = Mathf.Clamp(xValue, 4,8);
+
+        }
+        if(!string.IsNullOrEmpty(InputY.text) )
+        {
+            yValue = Int32.Parse(InputY.text);
+            yValue = Mathf.Clamp(yValue, 3,5);
+        }
+
+        InputX.text = xValue == -1 ? "" : xValue.ToString();
+        InputY.text = yValue == -1 ? "" : yValue.ToString();
+        
+        if(xValue % 2 != 0 || yValue == -1 ) return;
+        StartGameBTN.interactable = true;
     }
 }
