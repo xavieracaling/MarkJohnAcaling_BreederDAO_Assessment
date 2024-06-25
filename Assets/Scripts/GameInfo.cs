@@ -5,6 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameData", menuName = "ScriptableObjects/GameData", order = 1)]
 public class GameInfo  : ScriptableObject
 {
-    public int X;
-    public int Y;
+    public int XRow;
+    public int YColumn;
 }
