@@ -1,22 +1,34 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler
 {
+    public Vector2 OriginalPosition;
     public Image TileImage;
     public TileType TypeTile;
-
-    public void Initialize(Sprite newSprite, TileType tileType)
+    [Header("Grid")]
+    public int GridXRow;
+    public int GridYColumn;
+    [Header("4 Near Cross Tiles")]
+    public Tile TileUp;
+    public Tile TileDown;
+    public Tile TileLeft;
+    public Tile TileRight;
+    public void Initialize(Sprite newSprite, TileType tileType, int gridXRow, int gridYColumn)
     {
         TileImage.sprite = newSprite;
         TypeTile = tileType;
+        GridXRow = gridXRow;
+        GridYColumn = gridYColumn;
+        OriginalPosition = transform.localPosition;
     }
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log($"{gameObject.name} [{TypeTile.ToString()}] down");
+        Debug.Log($"{gameObject.name} down");
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -26,10 +38,94 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Debug.Log($"{GameManager.Instance.HoveredTile.name} [{TypeTile.ToString()}] up");
+        Debug.Log($"{GameManager.Instance.HoveredTile.name} up");
+        ValidateNearTile(GameManager.Instance.HoveredTile);
+    }
+    public void CheckValidSwitch()
+    {
 
     }
+    private void OnDestroy() {
+        GameManager.Instance.RefreshTileEvent?.RemoveListener(RefreshGetNearFourTiles);
+    }
+    [ContextMenu("GetResultNearFourTiles")]
+    public void GetResultNearFourTiles()
+    {
+        RefreshGetNearFourTiles();
+        Debug.Log(TileLeft == null ? "No Tile Left" : $"Tile Left: {TileLeft.gameObject.name}");
+        Debug.Log(TileRight == null ? "No Tile Right" : $"Tile Right: {TileRight.gameObject.name}");
+        Debug.Log(TileUp == null ? "No Tile Up" : $"Tile Up: {TileUp.gameObject.name}");
+        Debug.Log(TileDown == null ? "No Tile Down" : $"Tile Down: {TileDown.gameObject.name}");
+    }
+    public void RefreshGetNearFourTiles()
+    {
+        if(GridYColumn > 0 )
+            TileLeft = GameManager.Instance.TilesGrid[GridXRow,GridYColumn - 1];
 
+        if(GridYColumn <  GameManager.Instance.TilesGrid.GetLength(1) - 1)
+            TileRight = GameManager.Instance.TilesGrid[GridXRow,GridYColumn + 1];
+
+        if(GridXRow >  0)
+            TileUp = GameManager.Instance.TilesGrid[GridXRow - 1,GridYColumn ];
+        
+        if(GridXRow <  GameManager.Instance.TilesGrid.GetLength(0) - 1)
+            TileDown = GameManager.Instance.TilesGrid[GridXRow+ 1,GridYColumn ];
+    }
+    public void ValidateNearTile(Tile targetTileSwitch)
+    {
+        Tile finalTileToSwitch = null;
+
+        if(targetTileSwitch == TileUp)
+            finalTileToSwitch = TileUp;
+        
+        if(targetTileSwitch == TileDown)
+            finalTileToSwitch = TileDown;
+
+        if(targetTileSwitch == TileLeft)
+            finalTileToSwitch = TileLeft;
+
+        if(targetTileSwitch == TileRight)
+            finalTileToSwitch = TileRight;
+        
+        if(finalTileToSwitch != null)
+        {
+            Tile toSwitchTile = targetTileSwitch;
+            Tile myTile = this;
+
+            int targetTileSwitchGridX = targetTileSwitch.GridXRow;
+            int targetTileSwitchGridY = targetTileSwitch.GridYColumn;
+
+            int myTileSwitchGridX = GridXRow;
+            int mySwitchGridY = GridYColumn;
+            
+            Vector2 myTileVector = OriginalPosition;
+            Vector2 targetTileVector = toSwitchTile.OriginalPosition;
+
+            Vector2 myTileVectorTemp = OriginalPosition;
+            Vector2 targetTileVectorTemp = toSwitchTile.OriginalPosition;
+
+            GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = null;
+            GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = null;
+
+            GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = myTile;
+            GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = toSwitchTile;
+
+            myTile.GridXRow = targetTileSwitchGridX;
+            myTile.GridYColumn = targetTileSwitchGridY;
+
+            toSwitchTile.GridXRow = myTileSwitchGridX;
+            toSwitchTile.GridYColumn = mySwitchGridY;
+            
+            myTile.transform.DOKill();
+            toSwitchTile.transform.DOKill();
+            myTile.transform.DOLocalMove(targetTileVector, 0.5f).SetEase(Ease.InOutSine);
+            toSwitchTile.transform.DOLocalMove(myTileVector, 0.5f).SetEase(Ease.InOutSine);
+            GameManager.Instance.RefreshTileEvent?.Invoke();
+
+            OriginalPosition = targetTileVectorTemp;
+            toSwitchTile.OriginalPosition = myTileVectorTemp;
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {

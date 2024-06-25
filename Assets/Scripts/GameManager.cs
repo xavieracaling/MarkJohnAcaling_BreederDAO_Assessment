@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using System;
+using UnityEngine.Events;
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
+    public Tile[,] TilesGrid;
     public GameObject TilePrefab;
     public Transform TilesContainer;
     public static GameManager Instance;
     public Tile HoveredTile;
+    public UnityEvent RefreshTileEvent;
     [Header("Scriptable")]
     public GameInfo GameData;
     [Header("CG")]
@@ -32,6 +35,7 @@ public class GameManager : MonoBehaviour
                 Destroy(TilesContainer.GetChild(i).gameObject);
             }
         }
+        TilesGrid = new Tile[GameData.XRow,GameData.YColumn];
         for (int x = 0; x < GameData.XRow; x++)
         {
             int xColumnStartingPosition = x * -100;
@@ -52,10 +56,15 @@ public class GameManager : MonoBehaviour
                 tile.name = $"Tile[{x}][{y}] [{typeTile.ToString()}]";
 
                 Sprite tileSprite = GameData.GetTileImage(typeTile);
-                tileScript.Initialize(tileSprite,typeTile );
+                tileScript.Initialize(tileSprite,typeTile, x, y);
+                TilesGrid[x,y] = tileScript;
+                RefreshTileEvent?.AddListener(tileScript.RefreshGetNearFourTiles);
             }
         }
+        RefreshTileEvent?.Invoke();
     }
+    [ContextMenu("CallRefreshEventTiles")]
+    public void CallRefreshEventTiles() => RefreshTileEvent?.Invoke();
     // Update is called once per frame
     void Update()
     {
