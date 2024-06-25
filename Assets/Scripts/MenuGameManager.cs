@@ -5,14 +5,18 @@ using TMPro;
 using DG.Tweening;
 using UnityEngine.UI;
 using System;
+using UnityEngine.SceneManagement;
 public class MenuGameManager : MonoBehaviour
 {
+    [Header("Scriptable")]
+    public GameInfo GameData;
     [Header("Fields")]
     public TMP_InputField InputX;
     public TMP_InputField InputY;
     [Header("CG")]
 
     public CanvasGroup PlayContainer_CG;
+    public CanvasGroup UIContainer_CG;
     public GameObject InputContainerGO;
     [Header("Buttons")]
     public Button StartGameBTN;
@@ -66,6 +70,15 @@ public class MenuGameManager : MonoBehaviour
         InputY.text = yValue == -1 ? "" : yValue.ToString();
         
         if(xValue % 2 != 0 || yValue == -1 ) return;
+
+        GameData.Y = yValue;
+        GameData.X = xValue;
+
         StartGameBTN.interactable = true;
+    }
+    public async void StartGame()
+    {
+        await UIContainer_CG.DOFade(0f, 1.5f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
+        SceneManager.LoadScene("MainGame");
     }
 }
