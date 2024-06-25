@@ -522,6 +522,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TilePrefab: {fileID: 2351560769079184950, guid: ac6379ff8dde6d743af63fc42a0e59ad, type: 3}
   TilesContainer: {fileID: 146377500}
+  HoveredTile: {fileID: 0}
   GameData: {fileID: 11400000, guid: 86dfb0e81866dc94fb8a376910f69efe, type: 2}
   UIContainer_CG: {fileID: 1463933023}
 --- !u!1 &619394800

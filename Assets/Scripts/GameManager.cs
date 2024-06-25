@@ -2,16 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System;
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
     public GameObject TilePrefab;
     public Transform TilesContainer;
+    public static GameManager Instance;
+    public Tile HoveredTile;
     [Header("Scriptable")]
     public GameInfo GameData;
     [Header("CG")]
     public CanvasGroup UIContainer_CG;
     private void Awake() {
+        Instance = this;
         UIContainer_CG.alpha = 0;
     }
     async void Start()
@@ -37,7 +41,18 @@ public class GameManager : MonoBehaviour
                 int yColumnStartingPosition = y * 100;
                 int yColumnNewPosition = yColumnStartingPosition -(GameData.YColumn - 1) * 50; // my simple logic for centering the column tiles for x pos
                 GameObject tile = Instantiate(TilePrefab,TilesContainer);
+                Tile tileScript = tile.GetComponent<Tile>();
+
                 tile.transform.localPosition = new Vector2(yColumnNewPosition,xColumnNewPosition); //
+
+                TileType typeTile;
+                int randomTile = UnityEngine.Random.Range(0,Enum.GetValues(typeof(TileType)).Length);
+                typeTile = (TileType)randomTile;
+
+                tile.name = $"Tile[{x}][{y}] [{typeTile.ToString()}]";
+
+                Sprite tileSprite = GameData.GetTileImage(typeTile);
+                tileScript.Initialize(tileSprite,typeTile );
             }
         }
     }
