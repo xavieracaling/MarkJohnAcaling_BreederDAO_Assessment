@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ff8ee74296b1f48972595d12d46786, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
-  XRow: 4
+  XRow: 5
   YColumn: 10
   TilesImages:
   - TypeTile: 0

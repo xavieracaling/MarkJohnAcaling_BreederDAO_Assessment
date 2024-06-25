@@ -124,8 +124,64 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
             OriginalPosition = targetTileVectorTemp;
             toSwitchTile.OriginalPosition = myTileVectorTemp;
+            
+            if(myTileVectorTemp.x == targetTileVectorTemp.x) // same vertical switch
+            {
+                Debug.Log("Switched Vertical");
+            }
+            if(myTileVectorTemp.y == targetTileVectorTemp.y) // same horizontal switch
+            {
+                Debug.Log("Switched Horizontal");
+            }
+            List<Tile> myNumberOfCombinations = new List<Tile>();
+            List<Tile> tagetNumberOfCombinations = new List<Tile>();
+            
+            myNumberOfCombinations.Add(this);
+            tagetNumberOfCombinations.Add(toSwitchTile);
+            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileLeft);
+            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileRight);
+            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileDown);
+            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileUp);
+
+            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
+            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileRight);
+            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileDown);
+            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileUp);
+
+            Debug.Log($"myNumberOfCombinations {myNumberOfCombinations.Count} {TypeTile}");
+            Debug.Log($"tagetNumberOfCombinations {tagetNumberOfCombinations.Count} {toSwitchTile.TypeTile}");
         }
     }
+    public void ValidateSingleCombination(List<Tile> PassedOriginalListTiles, TileType originalTileType, Tile targetTile)
+    {
+        if(targetTile != null)
+        {
+            if(targetTile.TypeTile == originalTileType)
+            {
+                bool repetitiveTile = false;
+                for (int i = 0; i < PassedOriginalListTiles.Count; i++)
+                {
+                    if(PassedOriginalListTiles[i] == targetTile)
+                    {
+                        repetitiveTile = true;
+                        break;
+                    }
+                }
+
+                if(!repetitiveTile)
+                {
+                    PassedOriginalListTiles.Add(targetTile);
+                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileLeft);
+                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileRight);
+                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileDown);
+                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileUp);
+                }
+                    
+            }
+        }
+        
+    }
+
     // Start is called before the first frame update
     void Start()
     {
