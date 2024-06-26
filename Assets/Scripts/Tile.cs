@@ -133,26 +133,49 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
             {
                 Debug.Log("Switched Horizontal");
             }
-            List<Tile> myNumberOfCombinations = new List<Tile>();
-            List<Tile> tagetNumberOfCombinations = new List<Tile>();
+            List<Tile> myNumberOfCombinationsTotal = new List<Tile>();
+            List<Tile> myNumberOfCombinationsVertical = new List<Tile>();
+            List<Tile> myNumberOfCombinationsHorizontal = new List<Tile>();
             
-            myNumberOfCombinations.Add(this);
-            tagetNumberOfCombinations.Add(toSwitchTile);
-            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileLeft);
-            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileRight);
-            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileDown);
-            ValidateSingleCombination(myNumberOfCombinations,TypeTile,TileUp);
+            List<Tile> tagetNumberOfCombinationsTotal = new List<Tile>();
+            List<Tile> tagetNumberOfCombinationsVertical = new List<Tile>();
+            List<Tile> tagetNumberOfCombinationsHorizontal = new List<Tile>();
+            
+            myNumberOfCombinationsTotal.Add(this);
+            tagetNumberOfCombinationsTotal.Add(toSwitchTile);
 
-            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
-            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileRight);
-            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileDown);
-            ValidateSingleCombination(tagetNumberOfCombinations,toSwitchTile.TypeTile,toSwitchTile.TileUp);
+            myNumberOfCombinationsVertical.Add(this);
+            myNumberOfCombinationsHorizontal.Add(this);
 
-            Debug.Log($"myNumberOfCombinations {myNumberOfCombinations.Count} {TypeTile}");
-            Debug.Log($"tagetNumberOfCombinations {tagetNumberOfCombinations.Count} {toSwitchTile.TypeTile}");
+            tagetNumberOfCombinationsVertical.Add(toSwitchTile);
+            tagetNumberOfCombinationsHorizontal.Add(toSwitchTile);
+
+
+            ValidateSingleCombination(myNumberOfCombinationsVertical,TypeTile,TileDown,true);
+            ValidateSingleCombination(myNumberOfCombinationsVertical,TypeTile,TileUp,true);
+
+            ValidateSingleCombination(myNumberOfCombinationsHorizontal,TypeTile,TileLeft);
+            ValidateSingleCombination(myNumberOfCombinationsHorizontal,TypeTile,TileRight);
+        
+
+            ValidateSingleCombination(tagetNumberOfCombinationsVertical,toSwitchTile.TypeTile,TileDown,true);
+            ValidateSingleCombination(tagetNumberOfCombinationsVertical,toSwitchTile.TypeTile,TileUp,true);
+
+            ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,TileLeft);
+            ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,TileRight);
+
+            
+            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
+            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
+            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileDown);
+            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileUp);
+        
+
+            Debug.Log($"myNumberOfCombinationsVertical {myNumberOfCombinationsVertical.Count} {TypeTile}");
+            Debug.Log($"myNumberOfCombinationsHorizontal {myNumberOfCombinationsHorizontal.Count} {TypeTile}");
         }
     }
-    public void ValidateSingleCombination(List<Tile> PassedOriginalListTiles, TileType originalTileType, Tile targetTile)
+    public void ValidateSingleCombination(List<Tile> PassedOriginalListTiles, TileType originalTileType, Tile targetTile, bool vertical = false) // created a recursive checks
     {
         if(targetTile != null)
         {
@@ -171,10 +194,17 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 if(!repetitiveTile)
                 {
                     PassedOriginalListTiles.Add(targetTile);
-                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileLeft);
-                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileRight);
-                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileDown);
-                    ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileUp);
+                    if(vertical)
+                    {
+                        ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileDown, vertical);
+                        ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileUp, vertical);
+                    }
+                    else 
+                    {
+                        ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileLeft);
+                        ValidateSingleCombination(PassedOriginalListTiles,originalTileType,targetTile.TileRight);
+                    }
+
                 }
                     
             }
