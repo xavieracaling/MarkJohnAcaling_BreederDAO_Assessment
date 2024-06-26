@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: GameData
   m_EditorClassIdentifier: 
   CurrentTime: 53
-  CurrentScore: 0
+  CurrentScore: 10
   CurrentSwaps: 0
   CurrentNumberOfSwaps: 0
-  XRow: 8
+  XRow: 6
   Y: 5
-  UpperMaxValue: 4
+  UpperMaxValue: 3
   TilesImages:
   - TypeTile: 0
     TileSprite: {fileID: 21300000, guid: 65ed1976e7681b64990c10e624656474, type: 3}

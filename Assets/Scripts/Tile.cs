@@ -101,7 +101,8 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     } 
     async Task switchTile(Tile toSwitchTile, Tile myTile)
     {
-        
+        GameManager.Instance.GameData.CurrentSwaps += 1;
+        GameManager.Instance.UpdateUI();
         GameManager.Instance.TapEnable = false;
         Task switchedProgress = null;
         int targetTileSwitchGridX = toSwitchTile.GridXRow;

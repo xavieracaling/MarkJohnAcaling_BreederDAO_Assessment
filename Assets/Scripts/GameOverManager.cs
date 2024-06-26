@@ -4,6 +4,8 @@ using UnityEngine;
 using TMPro;
 using Asyncoroutine;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
+
 public class GameOverManager : MonoBehaviour
 {
     [Header("CG")]
@@ -25,5 +27,11 @@ public class GameOverManager : MonoBehaviour
     void Update()
     {
         
+    }
+    public async void MenuReturn()
+    {
+        await UIContainer_CG.DOFade(0f, 1f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
+        SceneManager.LoadScene("Pre Game Menu");
+
     }
 }

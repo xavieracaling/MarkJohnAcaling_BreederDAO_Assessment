@@ -32,6 +32,8 @@ public class MenuGameManager : MonoBehaviour
         InputX_OriginalPos = InputX.transform.localPosition;
         InputY_OriginalPos = InputY.transform.localPosition;
         StartGameBTN_OriginalPos = StartGameBTN.transform.localPosition;
+        UIContainer_CG.alpha = 0;
+        UIContainer_CG.DOFade(1f, 1f).SetEase(Ease.InOutSine);
     }
     public async void PlayGame()
     {
