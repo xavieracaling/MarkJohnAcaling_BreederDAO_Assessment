@@ -45,6 +45,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if(!GameManager.Instance.TapEnable) return;
         Debug.Log($"{GameManager.Instance.HoveredTile.name} up");
         ValidateNearTile(GameManager.Instance.HoveredTile);
     }
@@ -87,8 +88,50 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         gameObject.SetActive(true);
         Debug.Log($"SetActive to {gameObject.activeSelf} with {gameObject.name}" );
     } 
+    async Task switchTile(Tile toSwitchTile, Tile myTile)
+    {
+        GameManager.Instance.TapEnable = false;
+        Task switchedProgress = null;
+        int targetTileSwitchGridX = toSwitchTile.GridXRow;
+        int targetTileSwitchGridY = toSwitchTile.GridYColumn;
+
+        int myTileSwitchGridX = GridXRow;
+        int mySwitchGridY = GridYColumn;
+        
+        Vector2 myTileVector = OriginalPosition;
+        Vector2 targetTileVector = toSwitchTile.OriginalPosition;
+
+        Vector2 myTileVectorTemp = OriginalPosition;
+        Vector2 targetTileVectorTemp = toSwitchTile.OriginalPosition;
+
+        GameManager.Instance.TilesGrid[toSwitchTile.GridXRow, toSwitchTile.GridYColumn] = null;
+        GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = null;
+
+        GameManager.Instance.TilesGrid[toSwitchTile.GridXRow, toSwitchTile.GridYColumn] = myTile;
+        GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = toSwitchTile;
+
+        myTile.GridXRow = targetTileSwitchGridX;
+        myTile.GridYColumn = targetTileSwitchGridY;
+
+        toSwitchTile.GridXRow = myTileSwitchGridX;
+        toSwitchTile.GridYColumn = mySwitchGridY;
+        
+        myTile.transform.DOKill();
+        toSwitchTile.transform.DOKill();
+
+        switchedProgress = myTile.transform.DOLocalMove(targetTileVector, 0.5f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
+        toSwitchTile.transform.DOLocalMove(myTileVector, 0.5f).SetEase(Ease.InOutSine);
+
+        GameManager.Instance.RefreshTileEvent?.Invoke();
+
+        OriginalPosition = targetTileVectorTemp;
+        toSwitchTile.OriginalPosition = myTileVectorTemp;
+
+        await switchedProgress;
+    }
     public async void ValidateNearTile(Tile targetTileSwitch)
     {
+        Task switchedProgress = null;
         Tile finalTileToSwitch = null;
 
         if(targetTileSwitch == TileUp)
@@ -109,48 +152,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
             {
                 Tile toSwitchTile = targetTileSwitch;
                 Tile myTile = this;
-
-                int targetTileSwitchGridX = targetTileSwitch.GridXRow;
-                int targetTileSwitchGridY = targetTileSwitch.GridYColumn;
-
-                int myTileSwitchGridX = GridXRow;
-                int mySwitchGridY = GridYColumn;
-                
-                Vector2 myTileVector = OriginalPosition;
-                Vector2 targetTileVector = toSwitchTile.OriginalPosition;
-
-                Vector2 myTileVectorTemp = OriginalPosition;
-                Vector2 targetTileVectorTemp = toSwitchTile.OriginalPosition;
-
-                GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = null;
-                GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = null;
-
-                GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = myTile;
-                GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = toSwitchTile;
-
-                myTile.GridXRow = targetTileSwitchGridX;
-                myTile.GridYColumn = targetTileSwitchGridY;
-
-                toSwitchTile.GridXRow = myTileSwitchGridX;
-                toSwitchTile.GridYColumn = mySwitchGridY;
-                
-                myTile.transform.DOKill();
-                toSwitchTile.transform.DOKill();
-                myTile.transform.DOLocalMove(targetTileVector, 0.5f).SetEase(Ease.InOutSine);
-                toSwitchTile.transform.DOLocalMove(myTileVector, 0.5f).SetEase(Ease.InOutSine);
-                GameManager.Instance.RefreshTileEvent?.Invoke();
-
-                OriginalPosition = targetTileVectorTemp;
-                toSwitchTile.OriginalPosition = myTileVectorTemp;
-                
-                if(myTileVectorTemp.x == targetTileVectorTemp.x) // same vertical switch
-                {
-                    Debug.Log("Switched Vertical");
-                }
-                if(myTileVectorTemp.y == targetTileVectorTemp.y) // same horizontal switch
-                {
-                    Debug.Log("Switched Horizontal");
-                }
+                switchedProgress = switchTile(toSwitchTile, this);    
                 List<Tile> myNumberOfCombinationsTotal = new List<Tile>();
 
                 List<Tile> myNumberOfCombinationsVertical = new List<Tile>();
@@ -204,6 +206,13 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                     await new WaitForSeconds(0.95f);
                     GameManager.Instance.GenerateMissingTilesUpOrDown();
                 }
+                else
+                {
+                    await switchedProgress;
+                    switchTile(toSwitchTile, this); 
+                    GameManager.Instance.TapEnable = true;
+                    Debug.Log("NO combination");
+                }
             }
             
         }
@@ -236,6 +245,8 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     public bool MatchedTiles(List<Tile> listOfTiles)
     {
         bool match = listOfTiles.Count >= 3; 
+        if(GameManager.Instance.TapEnable) 
+            GameManager.Instance.TapEnable = false;
         if(listOfTiles.Count >= 3)
         {
             foreach (Tile item in listOfTiles)

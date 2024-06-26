@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
+    public bool TapEnable;
     public Tile[,] TilesGrid;
     public GameObject TilePrefab;
     public Transform TilesContainer;
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
     private void Awake() {
         Instance = this;
         UIContainer_CG.alpha = 0;
+        TapEnable = true;
     }
     async void Start()
     {
@@ -91,6 +93,7 @@ public class GameManager : MonoBehaviour
 
     public async void GenerateMissingTilesUpOrDown()
     {
+        TapEnable = false;
         int called = 0;
         List<Task> progressContainTiles = new List<Task>();
         List<Tile> allNewTiles = new List<Tile>();
@@ -312,7 +315,7 @@ public class GameManager : MonoBehaviour
             tile.ValidateMyWholeSingleCombination(tile);
            
         }
-
-        
+        if(!TapEnable)
+            TapEnable = true;
     }
 }
