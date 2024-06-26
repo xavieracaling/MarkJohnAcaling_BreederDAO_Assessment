@@ -185,40 +185,32 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
             Debug.Log($"myNumberOfCombinationsVertical {myNumberOfCombinationsVertical.Count} {TypeTile}");
             Debug.Log($"myNumberOfCombinationsHorizontal {myNumberOfCombinationsHorizontal.Count} {TypeTile}");
-            if(myNumberOfCombinationsVertical.Count >= 3)
-            {
-                foreach (Tile item in myNumberOfCombinationsVertical)
-                {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
-                    //Destroy(item);;
-                }
-            }
-            if(myNumberOfCombinationsHorizontal.Count >= 3)
-            {
-                foreach (Tile item in myNumberOfCombinationsHorizontal)
-                {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
-                    //Destroy(item);;
-                }
-            }
 
-            if(tagetNumberOfCombinationsVertical.Count >= 3)
+            bool matchA = MatchedTiles(myNumberOfCombinationsVertical);
+            bool matchB = MatchedTiles(myNumberOfCombinationsHorizontal);
+
+            bool matchC = MatchedTiles(tagetNumberOfCombinationsVertical);
+            bool matchD = MatchedTiles(tagetNumberOfCombinationsHorizontal);
+
+            if(matchA || matchB || matchC || matchD)
             {
-                foreach (Tile item in tagetNumberOfCombinationsVertical)
-                {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
-                    //Destroy(item);
-                }
-            }
-            if(tagetNumberOfCombinationsHorizontal.Count >= 3)
-            {
-                foreach (Tile item in tagetNumberOfCombinationsHorizontal)
-                {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
-                   // Destroy(item);;
-                }
+                Debug.Log("Found a match!");
             }
         }
+    }
+    public bool MatchedTiles(List<Tile> listOfTiles)
+    {
+        bool match = listOfTiles.Count >= 3;
+        if(listOfTiles.Count >= 3)
+        {
+            foreach (Tile item in listOfTiles)
+            {
+                item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
+                //Destroy(item);
+            }
+        }
+        return match;
+
     }
     public void ValidateSingleCombination(List<Tile> PassedOriginalListTiles, TileType originalTileType, Tile targetTile, bool vertical = false) // created a recursive checks
     {
