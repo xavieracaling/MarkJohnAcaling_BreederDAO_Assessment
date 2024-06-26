@@ -4,6 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 using System;
 using UnityEngine.Events;
+using Asyncoroutine;
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
@@ -17,6 +18,8 @@ public class GameManager : MonoBehaviour
     public GameInfo GameData;
     [Header("CG")]
     public CanvasGroup UIContainer_CG;
+
+    public float YUpperHide;
     private void Awake() {
         Instance = this;
         UIContainer_CG.alpha = 0;
@@ -55,30 +58,35 @@ public class GameManager : MonoBehaviour
             {
                 int yColumnStartingPosition = y * 100;
                 int yColumnNewPosition = yColumnStartingPosition -(GameData.YColumn - 1) * 50; // my simple logic for centering the column tiles for x pos
-                GameObject tile = Instantiate(TilePrefab,TilesContainer);
-                Tile tileScript = tile.GetComponent<Tile>();
-
-                tile.transform.localPosition = new Vector2(yColumnNewPosition,xColumnNewPosition); //
-
-                TileType typeTile;
-                int randomTile = UnityEngine.Random.Range(0,Enum.GetValues(typeof(TileType)).Length);
-                typeTile = (TileType)randomTile;
-
-                tile.name = $"Tile[{x}][{y}] [{typeTile.ToString()}]";
-
-                Sprite tileSprite = GameData.GetTileImage(typeTile);
-                tileScript.Initialize(tileSprite,typeTile, x, y);
-                TilesGrid[x,y] = tileScript;
-                RefreshTileEvent?.AddListener(tileScript.RefreshGetNearFourTiles);
+                
+                GenerateTile(x,y,xColumnNewPosition, yColumnNewPosition);
             }
         }
+        YUpperHide = TilesGrid[0,0].OriginalPosition.y + 100;
         RefreshTileEvent?.Invoke();
+    }
+    public void GenerateTile(int x, int y, int xColumnNewPosition, int yColumnNewPosition)
+    {
+            
+        GameObject tile = Instantiate(TilePrefab,TilesContainer);
+        Tile tileScript = tile.GetComponent<Tile>();
+        tile.transform.localPosition = new Vector2(yColumnNewPosition,xColumnNewPosition); //
+        TileType typeTile;
+        int randomTile = UnityEngine.Random.Range(0,Enum.GetValues(typeof(TileType)).Length);
+        typeTile = (TileType)randomTile;
+
+        tile.name = $"Tile[{x}][{y}] [{typeTile.ToString()}]";
+
+        Sprite tileSprite = GameData.GetTileImage(typeTile);
+        tileScript.Initialize(tileSprite,typeTile, x, y);
+        TilesGrid[x,y] = tileScript;
+        RefreshTileEvent?.AddListener(tileScript.RefreshGetNearFourTiles);
     }
     [ContextMenu("CallRefreshEventTiles")]
     public void CallRefreshEventTiles() => RefreshTileEvent?.Invoke();
     [ContextMenu("GenerateMissingTilesUpOrDown")]
 
-    public void GenerateMissingTilesUpOrDown()
+    public async void GenerateMissingTilesUpOrDown()
     {
         int called = 0;
         for (int y = 0; y < GameData.YColumn; y++)
@@ -87,45 +95,92 @@ public class GameManager : MonoBehaviour
             int xRow = 0;
 
             //upper half
-
-
-            List<(int,int)> upperHalfEmptyTilesToFill = new List<(int,int)>();
-            List<(int,int)> upperHalfContainedTiles = new List<(int,int)>();
-
-            for (int upperHalf = GameData.UpperMaxValue - 1; upperHalf >= 0; upperHalf--)
+            List<(int,int,Vector2, Tile,GameObject)> upperHalfEmptyTilesToFill = new List<(int,int,Vector2, Tile,GameObject)>();
+            List<(int,int,Vector2, Tile)> upperHalfContainedTiles = new List<(int,int,Vector2, Tile)>();
+            for (int upperHalf = GameData.UpperMaxValue - 1; upperHalf >= 0; upperHalf--) //getting tiles of upperHalfEmptyTilesToFill
             {
                 xRow = upperHalf;
                 if(TilesGrid[xRow,yColumn].Empty)
                 {
-                    upperHalfEmptyTilesToFill.Add((xRow, yColumn));
-                    Debug.Log($"Not enabled tile : xRow {xRow}, yColumn{yColumn}");
+                    Tile checkTile = TilesGrid[xRow,yColumn];
+                    upperHalfEmptyTilesToFill.Add((xRow, yColumn,TilesGrid[xRow,yColumn].OriginalPosition,checkTile, TilesGrid[xRow,yColumn].gameObject));
                 }
             }
-            // for (int i = 0; i < upperHalfEmptyTilesToFill.Count; i++)
-            // {
-            //     Vector2 targetMovePosition = TilesGrid[upperHalfEmptyTilesToFill[i].Item1,upperHalfEmptyTilesToFill[i].Item2].OriginalPosition;
-            //     Transform containedTile = TilesGrid[upperHalfContainedTiles[i].Item1,upperHalfContainedTiles[i].Item2].transform;
-            //     containedTile.DOLocalMove(targetMovePosition,0.5f).SetEase(Ease.InOutQuint);
-            //     Debug.Log($"to move from  {i + 1}");
-            // }
-            if(upperHalfEmptyTilesToFill.Count > 0)
+         
+            if(upperHalfEmptyTilesToFill.Count > 0) //if there is empty tile on a vertical
             {
-                for (int upperHalf = GameData.UpperMaxValue - 1; upperHalf >= 0; upperHalf--)
+                int lastRowUpperHalfEmpty = upperHalfEmptyTilesToFill[upperHalfEmptyTilesToFill.Count - 1].Item1;
+                for (int upperHalf = lastRowUpperHalfEmpty ; upperHalf >= 0; upperHalf--) //getting remaining tiles if there are on the vertical grid
                 {
                     xRow = upperHalf;
+                    
                     if(!TilesGrid[xRow,yColumn].Empty)
                     {
-                        upperHalfContainedTiles.Add((xRow, yColumn));
+                        Tile checkTile = TilesGrid[xRow,yColumn];
+
+                        upperHalfContainedTiles.Add((xRow, yColumn,TilesGrid[xRow,yColumn].OriginalPosition, checkTile));
                     }
                 }
-                for (int i = 0; i < upperHalfContainedTiles.Count; i++)
+
+            
+                for (int i = 0; i < upperHalfContainedTiles.Count; i++) //contained tiles go down
                 {
-                    Vector2 targetMovePosition = TilesGrid[upperHalfEmptyTilesToFill[i].Item1,upperHalfEmptyTilesToFill[i].Item2].OriginalPosition;
-                    Transform containedTile = TilesGrid[upperHalfContainedTiles[i].Item1,upperHalfContainedTiles[i].Item2].transform;
-                    containedTile.DOLocalMove(targetMovePosition,0.5f).SetEase(Ease.InOutQuint);
-                    Debug.Log($"tiles of upper half  grid  Grid({upperHalfContainedTiles[i].Item1},{upperHalfContainedTiles[i].Item2})");
+                    Tile originalTile = upperHalfContainedTiles[i].Item4;
+                    if(i == 0 ) // just base it on the first empty tiles only then container tiles data will follow that pattern
+                    {
+                        originalTile.GridXRow = upperHalfEmptyTilesToFill[i].Item1;
+                        originalTile.GridYColumn = upperHalfEmptyTilesToFill[i].Item2;
+                        originalTile.OriginalPosition = upperHalfEmptyTilesToFill[i].Item3;
+                        
+                    }
+                    else 
+                    {
+                        originalTile.GridXRow = upperHalfContainedTiles[i - 1].Item1;
+                        originalTile.GridYColumn = upperHalfContainedTiles[i - 1].Item2;
+                        originalTile.OriginalPosition = upperHalfContainedTiles[i - 1].Item3;
+
+                    }
+
+                    TilesGrid[originalTile.GridXRow, originalTile.GridYColumn ] = originalTile;
+                    originalTile.transform.DOLocalMove(originalTile.OriginalPosition,0.25f).SetEase(Ease.InOutSine);
                 }
+
+                for (int i = 0; i < upperHalfEmptyTilesToFill.Count; i++) //empty tiles will fill on top
+                {
+                    Debug.Log($"EMPTY TILES TO FILL {i}");
+                    Tile emptyTile = upperHalfEmptyTilesToFill[i].Item4;
+                    emptyTile.Empty = false;
+                    GameObject tileGO = upperHalfEmptyTilesToFill[i].Item5;
+                    Debug.Log($"is empty tile null {emptyTile == null}, {i}");
+                    if(upperHalfContainedTiles.Count - 1  - i >= 0)
+                    {
+                        emptyTile.GridXRow = upperHalfContainedTiles[upperHalfContainedTiles.Count - 1  - i].Item1;
+                        emptyTile.GridYColumn = upperHalfContainedTiles[upperHalfContainedTiles.Count - 1  - i].Item2;
+                        emptyTile.OriginalPosition = upperHalfContainedTiles[upperHalfContainedTiles.Count - 1  - i].Item3;
+
+
+                    }   
+                    else 
+                    {
+                        emptyTile.GridXRow = upperHalfEmptyTilesToFill[i].Item1;
+                        emptyTile.GridYColumn = upperHalfEmptyTilesToFill[i].Item2;
+                        emptyTile.OriginalPosition = upperHalfEmptyTilesToFill[i].Item3;
+
+                    }
+                    emptyTile.transform.DOKill();
+                    emptyTile.transform.localPosition = new Vector2(emptyTile.OriginalPosition.x,  YUpperHide);
+                    emptyTile.transform.localScale = Vector3.one;
+
+                    emptyTile.gameObject.name = "new move !!";
+                    emptyTile.gameObject.SetActive(true);
+                    Debug.Log($"new tile empty fill {emptyTile.gameObject.name}, {i}");
+
+                    TilesGrid[emptyTile.GridXRow, emptyTile.GridYColumn ] = emptyTile;
+                    emptyTile.transform.DOLocalMove(emptyTile.OriginalPosition,0.25f).SetEase(Ease.InOutSine).SetDelay(0.1f);
+                }
+
             }
+                RefreshTileEvent?.Invoke();
             
 
 

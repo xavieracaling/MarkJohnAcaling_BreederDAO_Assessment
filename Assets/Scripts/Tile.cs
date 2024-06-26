@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Asyncoroutine;
 public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler
 {
     public Vector2 OriginalPosition;
@@ -64,6 +66,10 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     }
     public void RefreshGetNearFourTiles()
     {
+        TileLeft = null;
+        TileRight = null;
+        TileUp = null;
+        TileDown = null;
         if(GridYColumn > 0 )
             TileLeft = GameManager.Instance.TilesGrid[GridXRow,GridYColumn - 1];
 
@@ -76,7 +82,12 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         if(GridXRow <  GameManager.Instance.TilesGrid.GetLength(0) - 1)
             TileDown = GameManager.Instance.TilesGrid[GridXRow+ 1,GridYColumn ];
     }
-    public void ValidateNearTile(Tile targetTileSwitch)
+    public void SetActiveGO() 
+    {
+        gameObject.SetActive(true);
+        Debug.Log($"SetActive to {gameObject.activeSelf} with {gameObject.name}" );
+    } 
+    public async void ValidateNearTile(Tile targetTileSwitch)
     {
         Tile finalTileToSwitch = null;
 
@@ -189,10 +200,14 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
                 bool matchC = MatchedTiles(tagetNumberOfCombinationsVertical);
                 bool matchD = MatchedTiles(tagetNumberOfCombinationsHorizontal);
-
+                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
+                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
+                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
+                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
                 if(matchA || matchB || matchC || matchD)
                 {
                     Debug.Log("Found a match!");
+                    await new WaitForSeconds(0.95f);
                     GameManager.Instance.GenerateMissingTilesUpOrDown();
                 }
             }
@@ -201,7 +216,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     }
     public bool MatchedTiles(List<Tile> listOfTiles)
     {
-        bool match = listOfTiles.Count >= 3;
+        bool match = listOfTiles.Count >= 3; 
         if(listOfTiles.Count >= 3)
         {
             foreach (Tile item in listOfTiles)
@@ -209,8 +224,10 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 item.Empty = true;
                 item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => 
                 {
-                    item.gameObject.SetActive(false);
-                    item.enabled = false;
+                    if(item.Empty)
+                    {
+                        item.gameObject.SetActive(false);
+                    }
                 });
                 //Destroy(item);
             }
