@@ -7,6 +7,8 @@ using UnityEngine.Events;
 using Asyncoroutine;
 using System.Threading.Tasks;
 using TMPro;
+using UnityEngine.SceneManagement;
+
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
@@ -38,6 +40,7 @@ public class GameManager : MonoBehaviour
     async void Start()
     {
         await UIContainer_CG.DOFade(1f, 1f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
+        GenerateTiles();
     }
     public async void StartTime()
     {
@@ -53,6 +56,9 @@ public class GameManager : MonoBehaviour
         GameData.CurrentTime = Mathf.Clamp(GameData.CurrentTime,0,120);
         GameOver = true;
         UpdateUI();
+        await UIContainer_CG.DOFade(0f, 1f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
+        SceneManager.LoadScene("Game Over");
+
     }
     public void UpdateUI()
     {

@@ -10,6 +10,7 @@ using Asyncoroutine;
 using System.Linq;
 public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler
 {
+    public Vector2 OriginalScale;
     public Vector2 OriginalPosition;
     public Image TileImage;
     public TileType TypeTile;
@@ -33,10 +34,16 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
        
         if(GridXRow < GameManager.Instance.GameData.UpperMaxValue)
             UpperHalfVerticalCategory =true;
+        OriginalScale = transform.localScale;
     }
     public void OnPointerDown(PointerEventData eventData)
     {
         Debug.Log($"{gameObject.name} down");
+        if(GameManager.Instance.GameOver) return;
+        if(!GameManager.Instance.TapEnable) return;
+        AudioManager.Instance.Clicked.Play();
+        transform.DOKill();
+        transform.DOScale(OriginalScale * 1.15f,0.3f).SetEase(Ease.OutSine);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -48,6 +55,8 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     {
         if(GameManager.Instance.GameOver) return;
         if(!GameManager.Instance.TapEnable) return;
+        transform.DOKill();
+        transform.DOScale(OriginalScale ,0.2f).SetEase(Ease.InOutSine);
         Debug.Log($"{GameManager.Instance.HoveredTile.name} up");
         ValidateNearTile(GameManager.Instance.HoveredTile);
     }
@@ -92,6 +101,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     } 
     async Task switchTile(Tile toSwitchTile, Tile myTile)
     {
+        
         GameManager.Instance.TapEnable = false;
         Task switchedProgress = null;
         int targetTileSwitchGridX = toSwitchTile.GridXRow;
@@ -118,11 +128,12 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         toSwitchTile.GridXRow = myTileSwitchGridX;
         toSwitchTile.GridYColumn = mySwitchGridY;
         
-        myTile.transform.DOKill();
-        toSwitchTile.transform.DOKill();
+        // myTile.transform.DOKill();
+        // toSwitchTile.transform.DOKill();
 
         switchedProgress = myTile.transform.DOLocalMove(targetTileVector, 0.5f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
         toSwitchTile.transform.DOLocalMove(myTileVector, 0.5f).SetEase(Ease.InOutSine);
+        AudioManager.Instance.Switch.Play();
 
         GameManager.Instance.RefreshTileEvent?.Invoke();
 
@@ -205,6 +216,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 if(matchA || matchB || matchC || matchD)
                 {
                     Debug.Log("Found a match!");
+                    AudioManager.Instance.Matched.Play();
                     GameManager.Instance.GameData.CurrentScore += (myNumberOfCombinationsVertical.Count - 1  + myNumberOfCombinationsHorizontal.Count) * 10;
                     GameManager.Instance.UpdateUI();
                     await new WaitForSeconds(0.95f);
@@ -241,6 +253,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         if(matchA || matchB )
         {
             Debug.Log("Found a match!");
+            AudioManager.Instance.Matched.Play();
             GameManager.Instance.GameData.CurrentScore += (myNumberOfCombinationsVertical.Count - 1 + myNumberOfCombinationsHorizontal.Count) * 10 ;
             GameManager.Instance.UpdateUI();
             await new WaitForSeconds(0.95f);
@@ -258,7 +271,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
             foreach (Tile item in listOfTiles)
             {
                 item.Empty = true;
-                item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => 
+                item.transform.DOScale(0,0.5f).SetEase(Ease.InOutSine).SetDelay(0.3f).OnComplete(() => 
                 {
                     if(item.Empty)
                     {
