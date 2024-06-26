@@ -19,6 +19,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     public Tile TileDown;
     public Tile TileLeft;
     public Tile TileRight;
+    public bool Empty;
     public void Initialize(Sprite newSprite, TileType tileType, int gridXRow, int gridYColumn)
     {
         TileImage.sprite = newSprite;
@@ -26,13 +27,8 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         GridXRow = gridXRow;
         GridYColumn = gridYColumn;
         OriginalPosition = transform.localPosition;
-        int upperHalfMaxVal = 0;
-        if(GameManager.Instance.GameData.XRow % 2 == 0)
-            upperHalfMaxVal =  GameManager.Instance.GameData.XRow / 2;
-        else 
-            upperHalfMaxVal =  (GameManager.Instance.GameData.XRow / 2) + 1 ; 
-
-        if(GridXRow < upperHalfMaxVal)
+       
+        if(GridXRow < GameManager.Instance.GameData.UpperMaxValue)
             UpperHalfVerticalCategory =true;
     }
     public void OnPointerDown(PointerEventData eventData)
@@ -98,104 +94,109 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         
         if(finalTileToSwitch != null)
         {
-            Tile toSwitchTile = targetTileSwitch;
-            Tile myTile = this;
-
-            int targetTileSwitchGridX = targetTileSwitch.GridXRow;
-            int targetTileSwitchGridY = targetTileSwitch.GridYColumn;
-
-            int myTileSwitchGridX = GridXRow;
-            int mySwitchGridY = GridYColumn;
-            
-            Vector2 myTileVector = OriginalPosition;
-            Vector2 targetTileVector = toSwitchTile.OriginalPosition;
-
-            Vector2 myTileVectorTemp = OriginalPosition;
-            Vector2 targetTileVectorTemp = toSwitchTile.OriginalPosition;
-
-            GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = null;
-            GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = null;
-
-            GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = myTile;
-            GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = toSwitchTile;
-
-            myTile.GridXRow = targetTileSwitchGridX;
-            myTile.GridYColumn = targetTileSwitchGridY;
-
-            toSwitchTile.GridXRow = myTileSwitchGridX;
-            toSwitchTile.GridYColumn = mySwitchGridY;
-            
-            myTile.transform.DOKill();
-            toSwitchTile.transform.DOKill();
-            myTile.transform.DOLocalMove(targetTileVector, 0.5f).SetEase(Ease.InOutSine);
-            toSwitchTile.transform.DOLocalMove(myTileVector, 0.5f).SetEase(Ease.InOutSine);
-            GameManager.Instance.RefreshTileEvent?.Invoke();
-
-            OriginalPosition = targetTileVectorTemp;
-            toSwitchTile.OriginalPosition = myTileVectorTemp;
-            
-            if(myTileVectorTemp.x == targetTileVectorTemp.x) // same vertical switch
+            if(!finalTileToSwitch.Empty)
             {
-                Debug.Log("Switched Vertical");
-            }
-            if(myTileVectorTemp.y == targetTileVectorTemp.y) // same horizontal switch
-            {
-                Debug.Log("Switched Horizontal");
-            }
-            List<Tile> myNumberOfCombinationsTotal = new List<Tile>();
-            List<Tile> myNumberOfCombinationsVertical = new List<Tile>();
-            List<Tile> myNumberOfCombinationsHorizontal = new List<Tile>();
+                Tile toSwitchTile = targetTileSwitch;
+                Tile myTile = this;
+
+                int targetTileSwitchGridX = targetTileSwitch.GridXRow;
+                int targetTileSwitchGridY = targetTileSwitch.GridYColumn;
+
+                int myTileSwitchGridX = GridXRow;
+                int mySwitchGridY = GridYColumn;
+                
+                Vector2 myTileVector = OriginalPosition;
+                Vector2 targetTileVector = toSwitchTile.OriginalPosition;
+
+                Vector2 myTileVectorTemp = OriginalPosition;
+                Vector2 targetTileVectorTemp = toSwitchTile.OriginalPosition;
+
+                GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = null;
+                GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = null;
+
+                GameManager.Instance.TilesGrid[targetTileSwitch.GridXRow, targetTileSwitch.GridYColumn] = myTile;
+                GameManager.Instance.TilesGrid[GridXRow, GridYColumn] = toSwitchTile;
+
+                myTile.GridXRow = targetTileSwitchGridX;
+                myTile.GridYColumn = targetTileSwitchGridY;
+
+                toSwitchTile.GridXRow = myTileSwitchGridX;
+                toSwitchTile.GridYColumn = mySwitchGridY;
+                
+                myTile.transform.DOKill();
+                toSwitchTile.transform.DOKill();
+                myTile.transform.DOLocalMove(targetTileVector, 0.5f).SetEase(Ease.InOutSine);
+                toSwitchTile.transform.DOLocalMove(myTileVector, 0.5f).SetEase(Ease.InOutSine);
+                GameManager.Instance.RefreshTileEvent?.Invoke();
+
+                OriginalPosition = targetTileVectorTemp;
+                toSwitchTile.OriginalPosition = myTileVectorTemp;
+                
+                if(myTileVectorTemp.x == targetTileVectorTemp.x) // same vertical switch
+                {
+                    Debug.Log("Switched Vertical");
+                }
+                if(myTileVectorTemp.y == targetTileVectorTemp.y) // same horizontal switch
+                {
+                    Debug.Log("Switched Horizontal");
+                }
+                List<Tile> myNumberOfCombinationsTotal = new List<Tile>();
+                List<Tile> myNumberOfCombinationsVertical = new List<Tile>();
+                List<Tile> myNumberOfCombinationsHorizontal = new List<Tile>();
+                
+                List<Tile> tagetNumberOfCombinationsTotal = new List<Tile>();
+                List<Tile> tagetNumberOfCombinationsVertical = new List<Tile>();
+                List<Tile> tagetNumberOfCombinationsHorizontal = new List<Tile>();
+                
+                myNumberOfCombinationsTotal.Add(this);
+                tagetNumberOfCombinationsTotal.Add(toSwitchTile);
+
+                myNumberOfCombinationsVertical.Add(this);
+                myNumberOfCombinationsHorizontal.Add(this);
+
+                tagetNumberOfCombinationsVertical.Add(toSwitchTile);
+                tagetNumberOfCombinationsHorizontal.Add(toSwitchTile);
+
+
+                ValidateSingleCombination(myNumberOfCombinationsVertical,TypeTile,TileDown,true);
+                ValidateSingleCombination(myNumberOfCombinationsVertical,TypeTile,TileUp,true);
+
+                ValidateSingleCombination(myNumberOfCombinationsHorizontal,TypeTile,TileLeft);
+                ValidateSingleCombination(myNumberOfCombinationsHorizontal,TypeTile,TileRight);
             
-            List<Tile> tagetNumberOfCombinationsTotal = new List<Tile>();
-            List<Tile> tagetNumberOfCombinationsVertical = new List<Tile>();
-            List<Tile> tagetNumberOfCombinationsHorizontal = new List<Tile>();
+
+                ValidateSingleCombination(tagetNumberOfCombinationsVertical,toSwitchTile.TypeTile,toSwitchTile.TileDown,true);
+                ValidateSingleCombination(tagetNumberOfCombinationsVertical,toSwitchTile.TypeTile,toSwitchTile.TileUp,true);
+
+                ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
+                ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
+
+                
+                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
+                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
+                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileDown);
+                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.c.TileUp);
             
-            myNumberOfCombinationsTotal.Add(this);
-            tagetNumberOfCombinationsTotal.Add(toSwitchTile);
 
-            myNumberOfCombinationsVertical.Add(this);
-            myNumberOfCombinationsHorizontal.Add(this);
+                Debug.Log($"tagetNumberOfCombinationsVertical {tagetNumberOfCombinationsVertical.Count} {toSwitchTile.TypeTile.ToString()}");
+                Debug.Log($"tagetNumberOfCombinationsHorizontal {tagetNumberOfCombinationsHorizontal.Count} {toSwitchTile.TypeTile.ToString()}");
 
-            tagetNumberOfCombinationsVertical.Add(toSwitchTile);
-            tagetNumberOfCombinationsHorizontal.Add(toSwitchTile);
+                Debug.Log($"myNumberOfCombinationsVertical {myNumberOfCombinationsVertical.Count} {TypeTile}");
+                Debug.Log($"myNumberOfCombinationsHorizontal {myNumberOfCombinationsHorizontal.Count} {TypeTile}");
 
+                bool matchA = MatchedTiles(myNumberOfCombinationsVertical);
+                bool matchB = MatchedTiles(myNumberOfCombinationsHorizontal);
 
-            ValidateSingleCombination(myNumberOfCombinationsVertical,TypeTile,TileDown,true);
-            ValidateSingleCombination(myNumberOfCombinationsVertical,TypeTile,TileUp,true);
+                bool matchC = MatchedTiles(tagetNumberOfCombinationsVertical);
+                bool matchD = MatchedTiles(tagetNumberOfCombinationsHorizontal);
 
-            ValidateSingleCombination(myNumberOfCombinationsHorizontal,TypeTile,TileLeft);
-            ValidateSingleCombination(myNumberOfCombinationsHorizontal,TypeTile,TileRight);
-        
-
-            ValidateSingleCombination(tagetNumberOfCombinationsVertical,toSwitchTile.TypeTile,toSwitchTile.TileDown,true);
-            ValidateSingleCombination(tagetNumberOfCombinationsVertical,toSwitchTile.TypeTile,toSwitchTile.TileUp,true);
-
-            ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
-            ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
-
-            
-            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
-            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
-            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileDown);
-            // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.c.TileUp);
-        
-
-            Debug.Log($"tagetNumberOfCombinationsVertical {tagetNumberOfCombinationsVertical.Count} {toSwitchTile.TypeTile.ToString()}");
-            Debug.Log($"tagetNumberOfCombinationsHorizontal {tagetNumberOfCombinationsHorizontal.Count} {toSwitchTile.TypeTile.ToString()}");
-
-            Debug.Log($"myNumberOfCombinationsVertical {myNumberOfCombinationsVertical.Count} {TypeTile}");
-            Debug.Log($"myNumberOfCombinationsHorizontal {myNumberOfCombinationsHorizontal.Count} {TypeTile}");
-
-            bool matchA = MatchedTiles(myNumberOfCombinationsVertical);
-            bool matchB = MatchedTiles(myNumberOfCombinationsHorizontal);
-
-            bool matchC = MatchedTiles(tagetNumberOfCombinationsVertical);
-            bool matchD = MatchedTiles(tagetNumberOfCombinationsHorizontal);
-
-            if(matchA || matchB || matchC || matchD)
-            {
-                Debug.Log("Found a match!");
+                if(matchA || matchB || matchC || matchD)
+                {
+                    Debug.Log("Found a match!");
+                    GameManager.Instance.GenerateMissingTilesUpOrDown();
+                }
             }
+            
         }
     }
     public bool MatchedTiles(List<Tile> listOfTiles)
@@ -205,7 +206,12 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         {
             foreach (Tile item in listOfTiles)
             {
-                item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
+                item.Empty = true;
+                item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => 
+                {
+                    item.gameObject.SetActive(false);
+                    item.enabled = false;
+                });
                 //Destroy(item);
             }
         }

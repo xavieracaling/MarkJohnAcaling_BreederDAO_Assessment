@@ -8,6 +8,7 @@ public class GameInfo  : ScriptableObject
 {
     public int XRow;
     public int YColumn;
+    public int UpperMaxValue;
     public List<ImageTiles> TilesImages = new List<ImageTiles>();
 
     public Sprite GetTileImage (TileType typeTile) => TilesImages.Where(w => w.TypeTile == typeTile).Select(w => w.TileSprite).Single();
