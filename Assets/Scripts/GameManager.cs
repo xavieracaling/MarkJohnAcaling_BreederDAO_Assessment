@@ -36,6 +36,11 @@ public class GameManager : MonoBehaviour
             }
         }
         TilesGrid = new Tile[GameData.XRow,GameData.YColumn];
+        float newWidth = TilePrefab.GetComponent<RectTransform>().sizeDelta.x * GameData.YColumn;
+        float newHeight = TilePrefab.GetComponent<RectTransform>().sizeDelta.y * GameData.XRow;
+        RectTransform tileRect = TilesContainer.GetComponent<RectTransform>();
+
+        tileRect.sizeDelta = new Vector2(newWidth,newHeight); 
         for (int x = 0; x < GameData.XRow; x++)
         {
             int xColumnStartingPosition = x * -100;

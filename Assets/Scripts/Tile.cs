@@ -10,6 +10,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
     public Vector2 OriginalPosition;
     public Image TileImage;
     public TileType TypeTile;
+    public bool UpperHalfVerticalCategory;
     [Header("Grid")]
     public int GridXRow;
     public int GridYColumn;
@@ -25,6 +26,14 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         GridXRow = gridXRow;
         GridYColumn = gridYColumn;
         OriginalPosition = transform.localPosition;
+        int upperHalfMaxVal = 0;
+        if(GameManager.Instance.GameData.XRow % 2 == 0)
+            upperHalfMaxVal =  GameManager.Instance.GameData.XRow / 2;
+        else 
+            upperHalfMaxVal =  (GameManager.Instance.GameData.XRow / 2) + 1 ; 
+
+        if(GridXRow < upperHalfMaxVal)
+            UpperHalfVerticalCategory =true;
     }
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -180,14 +189,16 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
             {
                 foreach (Tile item in myNumberOfCombinationsVertical)
                 {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f);
+                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
+                    //Destroy(item);;
                 }
             }
             if(myNumberOfCombinationsHorizontal.Count >= 3)
             {
                 foreach (Tile item in myNumberOfCombinationsHorizontal)
                 {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f);
+                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
+                    //Destroy(item);;
                 }
             }
 
@@ -195,14 +206,16 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
             {
                 foreach (Tile item in tagetNumberOfCombinationsVertical)
                 {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f);
+                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
+                    //Destroy(item);
                 }
             }
             if(tagetNumberOfCombinationsHorizontal.Count >= 3)
             {
                 foreach (Tile item in tagetNumberOfCombinationsHorizontal)
                 {
-                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f);
+                    item.transform.DOScale(0,0.5f).SetEase(Ease.InOutBack).SetDelay(0.3f).OnComplete(() => Destroy(item.gameObject));
+                   // Destroy(item);;
                 }
             }
         }
