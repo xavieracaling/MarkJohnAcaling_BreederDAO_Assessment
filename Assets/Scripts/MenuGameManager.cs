@@ -71,7 +71,7 @@ public class MenuGameManager : MonoBehaviour
         
         if(xValue % 2 != 0 || yValue == -1 ) return;
 
-        GameData.YColumn = yValue;
+        GameData.Y = yValue;
         GameData.XRow = xValue;
 
         StartGameBTN.interactable = true;

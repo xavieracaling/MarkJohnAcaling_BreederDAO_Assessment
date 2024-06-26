@@ -6,9 +6,11 @@ using System;
 using UnityEngine.Events;
 using Asyncoroutine;
 using System.Threading.Tasks;
+using TMPro;
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
+    
     public bool TapEnable;
     public Tile[,] TilesGrid;
     public GameObject TilePrefab;
@@ -16,6 +18,10 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public Tile HoveredTile;
     public UnityEvent RefreshTileEvent;
+    [Header("UI")]
+    public TextMeshProUGUI ScoreUI;
+    public TextMeshProUGUI TotalSwapsUI;
+    public TextMeshProUGUI TimeUI;
     [Header("Scriptable")]
     public GameInfo GameData;
     [Header("CG")]
@@ -23,6 +29,7 @@ public class GameManager : MonoBehaviour
 
     public float YUpperHide;
     public float YLowerHide;
+    public bool GameOver;
     private void Awake() {
         Instance = this;
         UIContainer_CG.alpha = 0;
@@ -32,9 +39,35 @@ public class GameManager : MonoBehaviour
     {
         await UIContainer_CG.DOFade(1f, 1f).SetEase(Ease.InOutSine).AsyncWaitForCompletion();
     }
+    public async void StartTime()
+    {
+        TapEnable = false;
+        await new WaitForSeconds(1);
+        TapEnable = true;
+        while(GameData.CurrentTime > 0)
+        {
+            GameData.CurrentTime--;
+            await new WaitForSeconds(1);
+            UpdateUI();
+        }
+        GameData.CurrentTime = Mathf.Clamp(GameData.CurrentTime,0,120);
+        GameOver = true;
+        UpdateUI();
+    }
+    public void UpdateUI()
+    {
+        TimeSpan timeSpan = TimeSpan.FromSeconds( GameData.CurrentTime );
+        TimeUI.text = $"{timeSpan.Minutes}:{timeSpan.Seconds.ToString("D2")}";
+        ScoreUI.text = $"Score: {GameData.CurrentScore}";
+        TotalSwapsUI.text = $"Total Swaps: {GameData.CurrentSwaps}";
+    } 
     [ContextMenu("GenerateTiles")]
     public void GenerateTiles()
     {
+        GameData.CurrentScore = 0;
+        GameData.CurrentTime = 60;
+        GameData.CurrentSwaps = 0;
+
         if(TilesContainer.childCount > 0)
         {
             for (int i = TilesContainer.childCount - 1; i >= 0; i--)
@@ -42,8 +75,8 @@ public class GameManager : MonoBehaviour
                 Destroy(TilesContainer.GetChild(i).gameObject);
             }
         }
-        TilesGrid = new Tile[GameData.XRow,GameData.YColumn];
-        float newWidth = TilePrefab.GetComponent<RectTransform>().sizeDelta.x * GameData.YColumn;
+        TilesGrid = new Tile[GameData.XRow,GameData.XRow];
+        float newWidth = TilePrefab.GetComponent<RectTransform>().sizeDelta.x * GameData.XRow;
         float newHeight = TilePrefab.GetComponent<RectTransform>().sizeDelta.y * GameData.XRow;
         RectTransform tileRect = TilesContainer.GetComponent<RectTransform>();
 
@@ -58,10 +91,10 @@ public class GameManager : MonoBehaviour
         { 
             int xColumnStartingPosition = x * -100;
             int xColumnNewPosition = xColumnStartingPosition +(GameData.XRow - 1) * 50; // my simple logic for centering the column tiles for y pos
-            for (int y = 0; y < GameData.YColumn; y++)
+            for (int y = 0; y < GameData.XRow; y++)
             {
                 int yColumnStartingPosition = y * 100;
-                int yColumnNewPosition = yColumnStartingPosition -(GameData.YColumn - 1) * 50; // my simple logic for centering the column tiles for x pos
+                int yColumnNewPosition = yColumnStartingPosition -(GameData.XRow - 1) * 50; // my simple logic for centering the column tiles for x pos
                 
                 GenerateTile(x,y,xColumnNewPosition, yColumnNewPosition);
             }
@@ -69,6 +102,7 @@ public class GameManager : MonoBehaviour
         YUpperHide = TilesGrid[0,0].OriginalPosition.y + 100;
         YLowerHide = TilesGrid[GameData.XRow - 1,0].OriginalPosition.y - 100;
         RefreshTileEvent?.Invoke();
+        StartTime();
     }
     public void GenerateTile(int x, int y, int xColumnNewPosition, int yColumnNewPosition)
     {
@@ -77,7 +111,7 @@ public class GameManager : MonoBehaviour
         Tile tileScript = tile.GetComponent<Tile>();
         tile.transform.localPosition = new Vector2(yColumnNewPosition,xColumnNewPosition); //
         TileType typeTile;
-        int randomTile = UnityEngine.Random.Range(0,Enum.GetValues(typeof(TileType)).Length);
+        int randomTile = UnityEngine.Random.Range(0,GameData.Y);
         typeTile = (TileType)randomTile;
 
         tile.name = $"Tile[{x}][{y}] [{typeTile.ToString()}]";
@@ -97,7 +131,7 @@ public class GameManager : MonoBehaviour
         int called = 0;
         List<Task> progressContainTiles = new List<Task>();
         List<Tile> allNewTiles = new List<Tile>();
-        for (int y = 0; y < GameData.YColumn; y++)
+        for (int y = 0; y < GameData.XRow; y++)
         {
             int yColumn = y;
             int xRow = 0;
@@ -176,7 +210,7 @@ public class GameManager : MonoBehaviour
                     Tile emptyTile = upperHalfEmptyTilesToFill[i].Item4;
                     TileType typeTile;
 
-                    int randomTile = UnityEngine.Random.Range(0,Enum.GetValues(typeof(TileType)).Length);
+                    int randomTile = UnityEngine.Random.Range(0,GameData.Y);
                     typeTile = (TileType)randomTile;
                     Sprite tileSprite = GameData.GetTileImage(typeTile);
                     emptyTile.TileImage.sprite = tileSprite;

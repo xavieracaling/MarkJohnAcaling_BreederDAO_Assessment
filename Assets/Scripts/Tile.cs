@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Asyncoroutine;
+using System.Linq;
 public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler
 {
     public Vector2 OriginalPosition;
@@ -45,6 +46,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if(GameManager.Instance.GameOver) return;
         if(!GameManager.Instance.TapEnable) return;
         Debug.Log($"{GameManager.Instance.HoveredTile.name} up");
         ValidateNearTile(GameManager.Instance.HoveredTile);
@@ -203,6 +205,8 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 if(matchA || matchB || matchC || matchD)
                 {
                     Debug.Log("Found a match!");
+                    GameManager.Instance.GameData.CurrentScore += (myNumberOfCombinationsVertical.Count - 1  + myNumberOfCombinationsHorizontal.Count) * 10;
+                    GameManager.Instance.UpdateUI();
                     await new WaitForSeconds(0.95f);
                     GameManager.Instance.GenerateMissingTilesUpOrDown();
                 }
@@ -234,13 +238,15 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
         bool matchA = MatchedTiles(myNumberOfCombinationsVertical);
         bool matchB = MatchedTiles(myNumberOfCombinationsHorizontal);
 
-       
         if(matchA || matchB )
         {
             Debug.Log("Found a match!");
+            GameManager.Instance.GameData.CurrentScore += (myNumberOfCombinationsVertical.Count - 1 + myNumberOfCombinationsHorizontal.Count) * 10 ;
+            GameManager.Instance.UpdateUI();
             await new WaitForSeconds(0.95f);
             GameManager.Instance.GenerateMissingTilesUpOrDown();
         }
+        
     }
     public bool MatchedTiles(List<Tile> listOfTiles)
     {

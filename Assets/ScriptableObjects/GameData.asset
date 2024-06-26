@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ff8ee74296b1f48972595d12d46786, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
-  XRow: 6
-  YColumn: 6
-  UpperMaxValue: 3
+  CurrentTime: 53
+  CurrentScore: 0
+  CurrentSwaps: 0
+  CurrentNumberOfSwaps: 0
+  XRow: 8
+  Y: 5
+  UpperMaxValue: 4
   TilesImages:
   - TypeTile: 0
     TileSprite: {fileID: 21300000, guid: 65ed1976e7681b64990c10e624656474, type: 3}
