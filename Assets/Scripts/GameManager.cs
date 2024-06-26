@@ -5,6 +5,7 @@ using DG.Tweening;
 using System;
 using UnityEngine.Events;
 using Asyncoroutine;
+using System.Threading.Tasks;
 public class GameManager : MonoBehaviour
 {
     // Start is called before the first frame update//
@@ -89,6 +90,8 @@ public class GameManager : MonoBehaviour
     public async void GenerateMissingTilesUpOrDown()
     {
         int called = 0;
+        List<Task> progressContainTiles = new List<Task>();
+        List<Tile> allNewTiles = new List<Tile>();
         for (int y = 0; y < GameData.YColumn; y++)
         {
             int yColumn = y;
@@ -104,6 +107,7 @@ public class GameManager : MonoBehaviour
                 {
                     Tile checkTile = TilesGrid[xRow,yColumn];
                     upperHalfEmptyTilesToFill.Add((xRow, yColumn,TilesGrid[xRow,yColumn].OriginalPosition,checkTile, TilesGrid[xRow,yColumn].gameObject));
+                    allNewTiles.Add(checkTile);
                 }
             }
          
@@ -119,6 +123,8 @@ public class GameManager : MonoBehaviour
                         Tile checkTile = TilesGrid[xRow,yColumn];
 
                         upperHalfContainedTiles.Add((xRow, yColumn,TilesGrid[xRow,yColumn].OriginalPosition, checkTile));
+                        allNewTiles.Add(checkTile);
+
                     }
                 }
 
@@ -176,14 +182,23 @@ public class GameManager : MonoBehaviour
                     Debug.Log($"new tile empty fill {emptyTile.gameObject.name}, {i}");
 
                     TilesGrid[emptyTile.GridXRow, emptyTile.GridYColumn ] = emptyTile;
-                    emptyTile.transform.DOLocalMove(emptyTile.OriginalPosition,0.25f).SetEase(Ease.InOutSine).SetDelay(0.1f);
+                    progressContainTiles.Add(emptyTile.transform.DOLocalMove(emptyTile.OriginalPosition,0.25f).SetEase(Ease.InOutSine).SetDelay(0.1f).AsyncWaitForCompletion()) ;
                 }
 
             }
                 RefreshTileEvent?.Invoke();
-            
-
+                
 
         }
+        await Task.WhenAll(progressContainTiles);
+        Debug.Log($"Donee {allNewTiles.Count} count all new tiles");
+
+        for (int i = 0; i < allNewTiles.Count; i++)
+        {
+            Tile tile = allNewTiles[i];
+            tile.ValidateMyWholeSingleCombination(tile);
+        }
+
+        
     }
 }

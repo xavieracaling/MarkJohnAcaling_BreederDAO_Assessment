@@ -152,10 +152,12 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                     Debug.Log("Switched Horizontal");
                 }
                 List<Tile> myNumberOfCombinationsTotal = new List<Tile>();
+
                 List<Tile> myNumberOfCombinationsVertical = new List<Tile>();
                 List<Tile> myNumberOfCombinationsHorizontal = new List<Tile>();
                 
                 List<Tile> tagetNumberOfCombinationsTotal = new List<Tile>();
+
                 List<Tile> tagetNumberOfCombinationsVertical = new List<Tile>();
                 List<Tile> tagetNumberOfCombinationsHorizontal = new List<Tile>();
                 
@@ -182,12 +184,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
                 ValidateSingleCombination(tagetNumberOfCombinationsHorizontal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
 
-                
-                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileLeft);
-                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileRight);
-                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.TypeTile,toSwitchTile.TileDown);
-                // ValidateSingleCombination(tagetNumberOfCombinationsTotal,toSwitchTile.c.TileUp);
-            
+          
 
                 Debug.Log($"tagetNumberOfCombinationsVertical {tagetNumberOfCombinationsVertical.Count} {toSwitchTile.TypeTile.ToString()}");
                 Debug.Log($"tagetNumberOfCombinationsHorizontal {tagetNumberOfCombinationsHorizontal.Count} {toSwitchTile.TypeTile.ToString()}");
@@ -200,10 +197,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
 
                 bool matchC = MatchedTiles(tagetNumberOfCombinationsVertical);
                 bool matchD = MatchedTiles(tagetNumberOfCombinationsHorizontal);
-                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
-                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
-                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
-                // matchedTilesProgress.Add(MatchedTiles(myNumberOfCombinationsVertical));
+          
                 if(matchA || matchB || matchC || matchD)
                 {
                     Debug.Log("Found a match!");
@@ -212,6 +206,31 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 }
             }
             
+        }
+    }
+    public async void ValidateMyWholeSingleCombination(Tile tile)
+    {
+        List<Tile> myNumberOfCombinationsVertical = new List<Tile>();
+        List<Tile> myNumberOfCombinationsHorizontal = new List<Tile>();
+        
+        myNumberOfCombinationsVertical.Add(tile);
+        myNumberOfCombinationsHorizontal.Add(tile);
+
+        tile.ValidateSingleCombination(myNumberOfCombinationsVertical,tile.TypeTile,tile.TileDown,true);
+        tile.ValidateSingleCombination(myNumberOfCombinationsVertical,tile.TypeTile,tile.TileUp,true);
+
+        tile.ValidateSingleCombination(myNumberOfCombinationsHorizontal,tile.TypeTile,tile.TileLeft);
+        tile.ValidateSingleCombination(myNumberOfCombinationsHorizontal,tile.TypeTile,tile.TileRight);
+        
+        bool matchA = MatchedTiles(myNumberOfCombinationsVertical);
+        bool matchB = MatchedTiles(myNumberOfCombinationsHorizontal);
+
+       
+        if(matchA || matchB )
+        {
+            Debug.Log("Found a match!");
+            await new WaitForSeconds(0.95f);
+            GameManager.Instance.GenerateMissingTilesUpOrDown();
         }
     }
     public bool MatchedTiles(List<Tile> listOfTiles)
