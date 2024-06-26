@@ -12,13 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ff8ee74296b1f48972595d12d46786, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
-  XRow: 4
-  YColumn: 4
-  UpperMaxValue: 2
+  XRow: 6
+  YColumn: 6
+  UpperMaxValue: 3
   TilesImages:
   - TypeTile: 0
-    TileSprite: {fileID: 21300000, guid: 0b05b6434114e4618a28ecd5bfe4586d, type: 3}
+    TileSprite: {fileID: 21300000, guid: 65ed1976e7681b64990c10e624656474, type: 3}
   - TypeTile: 1
-    TileSprite: {fileID: 21300000, guid: 25974626bde3949bb95d3067307e1cad, type: 3}
+    TileSprite: {fileID: 21300000, guid: 21a9ab743577d9a4fa0366fcea07c255, type: 3}
   - TypeTile: 2
-    TileSprite: {fileID: 21300000, guid: 6ffbc7146f0c34cd8bf2fd6654047270, type: 3}
+    TileSprite: {fileID: 21300000, guid: fac207327012aca42a1ab80fda268268, type: 3}
+  - TypeTile: 3
+    TileSprite: {fileID: 21300000, guid: 19055f58ddcfa3b498ca65f3b648e5fe, type: 3}
+  - TypeTile: 4
+    TileSprite: {fileID: 21300000, guid: cd4108777a619f44190cc9919534c78a, type: 3}

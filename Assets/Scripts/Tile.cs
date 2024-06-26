@@ -209,7 +209,7 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPoin
                 else
                 {
                     await switchedProgress;
-                    switchTile(toSwitchTile, this); 
+                    await switchTile(toSwitchTile, this); 
                     GameManager.Instance.TapEnable = true;
                     Debug.Log("NO combination");
                 }

@@ -4,7 +4,9 @@ using UnityEngine;
 
 public enum TileType 
 {
-    Bread,
-    ColoredBurgers,
-    ChocolateBread
+    Blue,
+    Green,
+    Red,
+    Purple,
+    Orange
 }
